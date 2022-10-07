@@ -4,5 +4,10 @@ require_relative "gdocs/version"
 
 module Gdocs
   class Error < StandardError; end
-  # Your code goes here...
+  
+  class Hello
+    def self.hello
+      "Hello, world!"
+    end
+  end
 end

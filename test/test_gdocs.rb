@@ -8,6 +8,6 @@ class TestGdocs < Minitest::Test
   end
 
   def test_it_does_something_useful
-    assert false
+    assert_equal "Hello, world!", Gdocs::Hello.hello, "Got different hello message"
   end
 end
