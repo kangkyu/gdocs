@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "gdocs/version"
+require "gdocs/config"
 
 module Gdocs
   class Error < StandardError; end
