@@ -16,7 +16,14 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+As of today, we only have `Gdocs::Models::Document#title`
+```rb
+require 'gdocs'
+
+d = Gdocs::Models::Document.new('1IlgYRWw2Vo4DJLYg53_AyZxWeFsgohoV-wZ_pdWLBio')
+d.run_request if ENV['GDOCS_AUTH_TOKEN']
+puts d.title
+```
 
 ## Development
 
