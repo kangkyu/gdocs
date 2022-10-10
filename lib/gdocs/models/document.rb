@@ -12,6 +12,8 @@ module Gdocs
       end
 
       def method_missing(m, *args, &block)
+        send(m, *args, &block) unless [:title, :document_id].include?(m)
+
         # to_s.camelize(:lower) - if we have ActiveSupport as dependency
         field = m.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
         value = instance_variable_get("@#{m.to_s}") || instance_variable_set("@#{m.to_s}", @data[field])
