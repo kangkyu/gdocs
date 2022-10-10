@@ -2,13 +2,9 @@
 
 require_relative "gdocs/version"
 require "gdocs/config"
+require "gdocs/models/document"
 
 module Gdocs
   class Error < StandardError; end
-  
-  class Hello
-    def self.hello
-      "Hello, world!"
-    end
-  end
+
 end

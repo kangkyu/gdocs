@@ -7,7 +7,9 @@ class TestGdocs < Minitest::Test
     refute_nil ::Gdocs::VERSION
   end
 
-  def test_it_does_something_useful
-    assert_equal "Hello, world!", Gdocs::Hello.hello, "Got different hello message"
+  def test_document_has_a_title
+    d = Gdocs::Models::Document.new('1IlgYRWw2Vo4DJLYg53_AyZxWeFsgohoV-wZ_pdWLBio')
+    d.data = {"title" => "Untitled Document"}
+    assert_equal "Untitled Document", d.title, "Got different document title"
   end
 end
