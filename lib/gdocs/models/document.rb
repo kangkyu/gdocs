@@ -1,8 +1,6 @@
 require 'net/http'
 require 'json'
 
-# require 'pry'
-
 module Gdocs
   module Models
     class Document
@@ -13,17 +11,10 @@ module Gdocs
         @token = ENV['GDOCS_AUTH_TOKEN']
       end
 
-      def title
-        # to_s.camelize(:lower) - if we use ActiveSupport
-        field = __method__.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
-        value = instance_variable_get("@#{__method__.to_s}") || instance_variable_set("@#{__method__.to_s}", @data[field])
-        value
-      end
-
-      def document_id
-        # to_s.camelize(:lower) - if we use ActiveSupport
-        field = __method__.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
-        value = instance_variable_get("@#{__method__.to_s}") || instance_variable_set("@#{__method__.to_s}", @data[field])
+      def method_missing(m, *args, &block)
+        # to_s.camelize(:lower) - if we have ActiveSupport as dependency
+        field = m.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
+        value = instance_variable_get("@#{m.to_s}") || instance_variable_set("@#{m.to_s}", @data[field])
         value
       end
 
