@@ -1,29 +1,27 @@
 require 'net/http'
 require 'json'
 
+require 'gdocs/concerns/attributes'
+
 module Gdocs
   module Models
     class Document
       attr_writer :data # for testing
 
-      def initialize
+      include Concerns::Attributes
+      document_attributes :title, :document_id, :revision_id
+
+      def initialize(token)
+        if token.to_s.empty?
+          raise ArgumentError.new("Auth Token must be present")
+        end
+
         @data = {}
-        @token = ENV['GDOCS_AUTH_TOKEN']
-      end
-
-      def method_missing(m, *args, &block)
-        super unless [:title, :document_id].include?(m)
-
-        # to_s.camelize(:lower) - if we have ActiveSupport as dependency
-        field = m.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
-        value = instance_variable_get("@#{m.to_s}") || instance_variable_set("@#{m.to_s}", @data[field])
-        value
+        @token = token
       end
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/get
       def run_get(document_id)
-        return unless @token
-
         uri_string = "https://docs.googleapis.com/v1/documents/#{document_id}"
         url = URI uri_string
 
@@ -39,8 +37,6 @@ module Gdocs
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/create
       def run_create(options = {})
-        return unless @token
-
         uri_string = "https://docs.googleapis.com/v1/documents"
         url = URI uri_string
 
@@ -53,7 +49,7 @@ module Gdocs
           http.request(req)
         end
         @data.merge! JSON(res.body)
-        self.document_id
+        self
       end
     end
   end
