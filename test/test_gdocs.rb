@@ -8,7 +8,7 @@ class TestGdocs < Minitest::Test
   end
 
   def test_document_has_a_title
-    d = Gdocs::Models::Document.new
+    d = Gdocs::Models::Document.new("ya29.abc")
     assert d.respond_to?(:run_get)
 
     d.data = {"title" => "Untitled Document"}

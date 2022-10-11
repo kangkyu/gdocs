@@ -20,11 +20,12 @@ As of today, we only have `Gdocs::Models::Document#run_get` and `Gdocs::Models::
 ```rb
 require 'gdocs'
 
-d = Gdocs::Models::Document.new
+d = Gdocs::Models::Document.new(ENV['GDOCS_AUTH_TOKEN'])
 d.run_create(title: "Jimmy")
+d.document_id
 # => "1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8"
 
-d.run_get('1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8') if ENV['GDOCS_AUTH_TOKEN']
+d.run_get('1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8')
 d.title
 # => "Jimmy"
 ```
