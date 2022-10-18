@@ -28,6 +28,11 @@ d.document_id
 d.run_get('1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8')
 d.title
 # => "Jimmy"
+
+d.text_to_body("Ali Baba and the Forty Thieves\n")
+d.text_to_body("\"I liked it\"\n")
+
+# check your file `https://docs.google.com/document/d/1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8/edit`
 ```
 
 ## Development
