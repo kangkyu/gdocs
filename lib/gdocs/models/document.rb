@@ -1,6 +1,5 @@
 require 'net/http'
 require 'json'
-require 'pry'
 
 require 'gdocs/concerns/attributes'
 
