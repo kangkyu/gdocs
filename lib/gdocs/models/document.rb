@@ -18,6 +18,7 @@ module Gdocs
 
         @data = {}
         @token = token
+        @end = 0
       end
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/get
@@ -50,6 +51,36 @@ module Gdocs
         end
         @data.merge! JSON(res.body)
         self
+      end
+
+      def text_to_body(text)
+        raise Gdocs::Error.new("No data error. Use run_get or run_create method.") if @data.empty?
+        @last_revision_id ||= self.revision_id
+
+        uri_string = "https://docs.googleapis.com/v1/documents/#{self.document_id}:batchUpdate"
+        url = URI uri_string
+
+        req = Net::HTTP::Post.new(uri_string)
+        req.initialize_http_header 'Content-Type' => 'application/json'
+        req['Authorization'] = "Bearer #{@token}"
+        # If a segment ID is provided, it must be a header, footer or footnote ID.
+        # Use an empty segment ID to reference the body.
+        req.body = {
+          requests: [
+            {insertText: {text: text, location: {index: @end + 1}}}
+          ],
+          writeControl: {requiredRevisionId: @last_revision_id}
+        }.to_json
+
+        res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
+          http.request(req)
+        end
+        response_body = JSON(res.body)
+        if response_body["error"]
+          raise Gdocs::Error.new(response_body["error"]["message"])
+        end
+        @end += text.length
+        @last_revision_id = response_body["writeControl"]["requiredRevisionId"]
       end
     end
   end

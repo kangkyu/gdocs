@@ -1,3 +1,5 @@
+require 'gdocs/utils/string'
+
 module Gdocs
   module Concerns
     module Attributes
@@ -12,8 +14,7 @@ module Gdocs
           attributes.each do |attribute|
             m = attribute.to_sym
             define_method(m) do
-              # to_s.camelize(:lower) - if we have ActiveSupport as dependency
-              field = m.to_s.split('_').inject([]){ |buffer, e| buffer + [buffer.empty? ? e : e.capitalize] }.join
+              field = m.to_s.camelize_lower
               value = instance_variable_get("@#{m.to_s}") || instance_variable_set("@#{m.to_s}", @data[field])
               value
             end
