@@ -53,7 +53,8 @@ module Gdocs
         self
       end
 
-      def text_to_body(text)
+      # See https://developers.google.com/docs/api/reference/rest/v1/documents/request#InsertTextRequest
+      def text_to_body(text, font: "Roboto Slab")
         raise Gdocs::Error.new("No data error. Use run_get or run_create method.") if @data.empty?
         @last_revision_id ||= self.revision_id
 
@@ -67,7 +68,9 @@ module Gdocs
         # Use an empty segment ID to reference the body.
         req.body = {
           requests: [
-            {insertText: {text: text, location: {index: @end + 1}}}
+            {insertText: {text: text, location: {index: @end + 1}}},
+            {updateTextStyle: {textStyle: {weightedFontFamily: {fontFamily: font, weight: 500}},
+              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length}}}
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         }.to_json
