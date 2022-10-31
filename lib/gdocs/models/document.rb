@@ -76,6 +76,7 @@ module Gdocs
         @end += 1
       end
 
+      # https://developers.google.com/docs/api/reference/rest/v1/documents/request#InsertTableRequest
       def table_to_body(rows, columns)
         update_body({
           requests: [
