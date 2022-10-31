@@ -20,19 +20,23 @@ As of today, we only have `Gdocs::Models::Document#run_get` and `Gdocs::Models::
 ```rb
 require 'gdocs'
 
-d = Gdocs::Models::Document.new(ENV['GDOCS_AUTH_TOKEN'])
-d.run_create(title: "Jimmy")
+d = Gdocs::Models::Document.new("ya29.a0Aa4xrXO...")
+d.run_create(title: "Jimmy's Report")
 d.document_id
 # => "1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8"
 
 d.run_get('1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8')
 d.title
-# => "Jimmy"
+# => "Jimmy's Report"
 
 d.text_to_body("Ali Baba and the Forty Thieves\n")
 d.text_to_body("\"I liked it\"\n")
 
-# check your file `https://docs.google.com/document/d/1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8/edit`
+d.text_to_body("Look at this table", font: "Source Code Pro")
+d.table_to_body(6, 8)
+
+# check your file!
+# https://docs.google.com/document/d/1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8/edit
 ```
 
 ## Development
