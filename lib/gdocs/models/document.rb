@@ -55,6 +55,38 @@ module Gdocs
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/request#InsertTextRequest
       def text_to_body(text, font: "Roboto Slab")
+        update_body({
+          requests: [
+            {insertText: {text: text, location: {index: @end + 1}}},
+            {updateTextStyle: {textStyle: {weightedFontFamily: {fontFamily: font, weight: 500}},
+              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length + 1}}}
+          ],
+          writeControl: {requiredRevisionId: @last_revision_id}
+        })
+        @end += text.length
+      end
+
+      def newline
+        update_body({
+          requests: [
+            {insertText: {text: "\n", location: {index: @end + 1}}},
+          ],
+          writeControl: {requiredRevisionId: @last_revision_id}
+        })
+        @end += 1
+      end
+
+      def table_to_body(rows, columns)
+        update_body({
+          requests: [
+            {insertTable: {rows: rows, columns: columns, location: {index: @end + 1}}}
+          ],
+          writeControl: {requiredRevisionId: @last_revision_id}
+        })
+        @end += 3 + (columns * 2 + 1) * rows
+      end
+
+      def update_body(request_body)
         raise Gdocs::Error.new("No data error. Use run_get or run_create method.") if @data.empty?
         @last_revision_id ||= self.revision_id
 
@@ -64,25 +96,18 @@ module Gdocs
         req = Net::HTTP::Post.new(uri_string)
         req.initialize_http_header 'Content-Type' => 'application/json'
         req['Authorization'] = "Bearer #{@token}"
-        # If a segment ID is provided, it must be a header, footer or footnote ID.
-        # Use an empty segment ID to reference the body.
-        req.body = {
-          requests: [
-            {insertText: {text: text, location: {index: @end + 1}}},
-            {updateTextStyle: {textStyle: {weightedFontFamily: {fontFamily: font, weight: 500}},
-              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length}}}
-          ],
-          writeControl: {requiredRevisionId: @last_revision_id}
-        }.to_json
+        # "If a segment ID is provided, it must be a header, footer or footnote ID.
+        # Use an empty segment ID to reference the body."
+        req.body = request_body.to_json
 
         res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
           http.request(req)
         end
         response_body = JSON(res.body)
+        puts response_body
         if response_body["error"]
           raise Gdocs::Error.new(response_body["error"]["message"])
         end
-        @end += text.length
         @last_revision_id = response_body["writeControl"]["requiredRevisionId"]
       end
     end
