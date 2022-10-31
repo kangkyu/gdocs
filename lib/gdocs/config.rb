@@ -28,17 +28,20 @@ module Gdocs
   extend Config
 
   class Configuration
-  # @return [String] the Client ID for Google clients.
-  # @see https://console.developers.google.com
+    # @return [String] the Client ID for Google clients.
+    # @see https://console.developers.google.com
     attr_accessor :client_id
 
     # @return [String] the Client Secret for Google clients.
     # @see https://console.developers.google.com
     attr_accessor :client_secret
 
+    attr_accessor :log_level
+
     def initialize
       @client_id = ENV['GDOCS_CLIENT_ID']
       @client_secret = ENV['GDOCS_CLIENT_SECRET']
+      @log_level = ENV['GDOCS_LOG_LEVEL']
     end
   end
 end

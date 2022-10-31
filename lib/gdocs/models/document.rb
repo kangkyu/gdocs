@@ -104,7 +104,7 @@ module Gdocs
           http.request(req)
         end
         response_body = JSON(res.body)
-        puts response_body
+        # puts response_body if Gdocs.configuration.log_level == 'development'
         if response_body["error"]
           raise Gdocs::Error.new(response_body["error"]["message"])
         end
