@@ -46,6 +46,8 @@ d.table_to_body(6, 8)
 # https://docs.google.com/document/d/1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8/edit
 ```
 
+<img width="864" alt="Screenshot 2023-04-17 at 5 49 11 PM" src="https://user-images.githubusercontent.com/6598297/232641289-0fd13fb7-0403-4211-8eb5-80fa1b9183d1.png">
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
