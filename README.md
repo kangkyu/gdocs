@@ -1,4 +1,4 @@
-![Gem](https://img.shields.io/gem/v/gdocs)
+[![Gem](https://img.shields.io/gem/v/gdocs)](https://rubygems.org/gems/gdocs)
 
 # Gdocs
 
