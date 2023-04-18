@@ -18,11 +18,13 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-As of today, we only have `Gdocs::Models::Document#run_get` and `Gdocs::Models::Document#run_create`
+Currently, we have `Gdocs::Models::Document#run_get` and `Gdocs::Models::Document#run_create`
 ```rb
 require 'gdocs'
 
-d = Gdocs::Models::Document.new("ya29.a0Aa4xrXO...")
+access_token = "ya29.a0Aa4xrXO..."
+d = Gdocs::Models::Document.new(access_token)
+
 d.run_create(title: "Jimmy's Report")
 d.document_id
 # => "1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8"
@@ -30,7 +32,10 @@ d.document_id
 d.run_get('1qpN_MR_i1rnu7-MD03JKUGlTvOT2GFgr5uyhhsvJ2Z8')
 d.title
 # => "Jimmy's Report"
+```
 
+And, you can also add text and a table:
+```rb
 d.text_to_body("Ali Baba and the Forty Thieves\n")
 d.text_to_body("\"I liked it\"\n")
 
