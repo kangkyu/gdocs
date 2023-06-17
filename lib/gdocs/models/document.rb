@@ -86,6 +86,9 @@ module Gdocs
         url_path = "/#{self.document_id}:batchUpdate"
         response_body = document_post_request(url_path, body: request_body)
 
+        # "If a segment ID is provided, it must be a header, footer or footnote ID.
+        # Use an empty segment ID to reference the body."
+
         @last_revision_id = response_body["writeControl"]["requiredRevisionId"]
       end
 
