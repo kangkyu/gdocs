@@ -11,6 +11,8 @@ module Gdocs
       include Concerns::Attributes
       document_attributes :title, :document_id, :revision_id
 
+      GOOGLE_DOCS = 'https://docs.googleapis.com/v1/documents'
+
       def initialize(token)
         if token.to_s.empty?
           raise ArgumentError.new("Auth Token must be present")
@@ -23,32 +25,17 @@ module Gdocs
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/get
       def run_get(document_id)
-        uri_string = "https://docs.googleapis.com/v1/documents/#{document_id}"
-        url = URI uri_string
-
-        req = Net::HTTP::Get.new(uri_string)
-        req['Authorization'] = "Bearer #{@token}"
-
-        res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
-          http.request(req)
-        end
+        res = document_get_request("/#{document_id}")
         @data.merge! JSON(res.body)
         self
       end
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/create
       def run_create(options = {})
-        uri_string = "https://docs.googleapis.com/v1/documents"
-        url = URI uri_string
+        # TODO: more option items (or just options.to_json if possible)
+        json_string = {title: options[:title]}.to_json
 
-        req = Net::HTTP::Post.new(uri_string)
-        req.initialize_http_header 'Content-Type' => 'application/json'
-        req['Authorization'] = "Bearer #{@token}"
-        req.body = {title: options[:title]}.to_json
-
-        res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
-          http.request(req)
-        end
+        res = document_post_request("", body: json_string)
         @data.merge! JSON(res.body)
         self
       end
@@ -87,29 +74,46 @@ module Gdocs
         @end += 3 + (columns * 2 + 1) * rows
       end
 
+      private
+
       def update_body(request_body)
-        raise Gdocs::Error.new("No data error. Use run_get or run_create method.") if @data.empty?
+        raise Gdocs::Error.new("No data error. Use run_get or run_create method first.") if @data.empty?
         @last_revision_id ||= self.revision_id
 
-        uri_string = "https://docs.googleapis.com/v1/documents/#{self.document_id}:batchUpdate"
-        url = URI uri_string
-
-        req = Net::HTTP::Post.new(uri_string)
-        req.initialize_http_header 'Content-Type' => 'application/json'
-        req['Authorization'] = "Bearer #{@token}"
-        # "If a segment ID is provided, it must be a header, footer or footnote ID.
-        # Use an empty segment ID to reference the body."
-        req.body = request_body.to_json
-
-        res = Net::HTTP.start(url.host, url.port, :use_ssl => url.scheme == 'https') do |http|
-          http.request(req)
-        end
+        json_string = request_body.to_json
+        res = document_post_request("/#{self.document_id}:batchUpdate", body: json_string)
         response_body = JSON(res.body)
+
         # puts response_body if Gdocs.configuration.log_level == 'development'
         if response_body["error"]
           raise Gdocs::Error.new(response_body["error"]["message"])
         end
         @last_revision_id = response_body["writeControl"]["requiredRevisionId"]
+      end
+
+      def document_post_request(url_path, body: "{}")
+        uri = URI(GOOGLE_DOCS + url_path)
+
+        req = Net::HTTP::Post.new(uri.to_s)
+        req.initialize_http_header 'Content-Type' => 'application/json'
+        req['Authorization'] = "Bearer #{@token}"
+
+        req.body = body
+
+        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+          http.request(req)
+        end
+      end
+
+      def document_get_request(url_path)
+        uri = URI(GOOGLE_DOCS + url_path)
+
+        req = Net::HTTP::Get.new(uri.to_s)
+        req['Authorization'] = "Bearer #{@token}"
+
+        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+          http.request(req)
+        end
       end
     end
   end
