@@ -6,7 +6,7 @@ require 'gdocs/concerns/attributes'
 module Gdocs
   module Models
     class Document
-      attr_writer :data # for testing
+      attr_writer :data # for testing only
 
       include Concerns::Attributes
       document_attributes :title, :document_id, :revision_id
@@ -25,18 +25,18 @@ module Gdocs
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/get
       def run_get(document_id)
-        res = document_get_request("/#{document_id}")
-        @data.merge! JSON(res.body)
+        response_body = document_get_request("/#{document_id}")
+        @data.merge! response_body
         self
       end
 
       # See https://developers.google.com/docs/api/reference/rest/v1/documents/create
       def run_create(options = {})
         # TODO: more option items (or just options.to_json if possible)
-        json_string = {title: options[:title]}.to_json
+        request_body = {title: options[:title]}
 
-        res = document_post_request("", body: json_string)
-        @data.merge! JSON(res.body)
+        response_body = document_post_request("", body: request_body)
+        @data.merge! response_body
         self
       end
 
@@ -77,32 +77,37 @@ module Gdocs
       private
 
       def update_body(request_body)
-        raise Gdocs::Error.new("No data error. Use run_get or run_create method first.") if @data.empty?
+        if @data.empty?
+          raise Gdocs::Error.new("No data error. Use run_get or run_create method first.")
+        end
+
         @last_revision_id ||= self.revision_id
 
-        json_string = request_body.to_json
-        res = document_post_request("/#{self.document_id}:batchUpdate", body: json_string)
-        response_body = JSON(res.body)
+        url_path = "/#{self.document_id}:batchUpdate"
+        response_body = document_post_request(url_path, body: request_body)
 
-        # puts response_body if Gdocs.configuration.log_level == 'development'
-        if response_body["error"]
-          raise Gdocs::Error.new(response_body["error"]["message"])
-        end
         @last_revision_id = response_body["writeControl"]["requiredRevisionId"]
       end
 
-      def document_post_request(url_path, body: "{}")
+      def document_post_request(url_path, body: {})
         uri = URI(GOOGLE_DOCS + url_path)
 
         req = Net::HTTP::Post.new(uri.to_s)
         req.initialize_http_header 'Content-Type' => 'application/json'
         req['Authorization'] = "Bearer #{@token}"
 
-        req.body = body
+        req.body = body.to_json
 
-        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+        res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
           http.request(req)
         end
+
+        response_body = JSON(res.body)
+
+        if response_body["error"]
+          raise Gdocs::Error.new(response_body["error"]["message"])
+        end
+        response_body
       end
 
       def document_get_request(url_path)
@@ -111,9 +116,10 @@ module Gdocs
         req = Net::HTTP::Get.new(uri.to_s)
         req['Authorization'] = "Bearer #{@token}"
 
-        Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+        res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
           http.request(req)
         end
+        JSON(res.body)
       end
     end
   end
