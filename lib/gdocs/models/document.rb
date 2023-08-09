@@ -98,9 +98,8 @@ module Gdocs
 
       def document_post_request(url_path, body: {})
         uri = URI(GOOGLE_DOCS + url_path)
-        json_body = body.to_json
 
-        res = post_request(uri, auth_token: @token, body: json_body)
+        res = post_request(uri, auth_token: @token, body: body.to_json)
         response_body = JSON(res.body)
 
         if response_body["error"]

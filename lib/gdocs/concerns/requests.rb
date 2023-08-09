@@ -15,7 +15,7 @@ module Gdocs
         req.initialize_http_header 'Content-Type' => 'application/json'
         req['Authorization'] = "Bearer #{auth_token}"
 
-        req.body = json_body
+        req.body = body
 
         res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
           http.request(req)
