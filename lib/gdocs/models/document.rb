@@ -27,7 +27,7 @@ module Gdocs
       def run_get(document_id)
         response_body = document_get_request("/#{document_id}")
         @data.merge! response_body
-        @end = @data["body"]["content"][-1]["endIndex"]
+        @end = @data["body"]["content"][-1]["endIndex"] - 1
         self
       end
 
@@ -38,7 +38,7 @@ module Gdocs
 
         response_body = document_post_request("", body: request_body)
         @data.merge! response_body
-        @end = @data["body"]["content"][-1]["endIndex"]
+        @end = @data["body"]["content"][-1]["endIndex"] - 1
         self
       end
 
@@ -46,9 +46,9 @@ module Gdocs
       def text_to_body(text, font: "Roboto Slab")
         update_body({
           requests: [
-            {insertText: {text: text, location: {index: @end + 1}}},
+            {insertText: {text: text, location: {index: @end}}},
             {updateTextStyle: {textStyle: {weightedFontFamily: {fontFamily: font, weight: 500}},
-              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length + 1}}}
+              fields: "*", range: {startIndex: @end, endIndex: @end + text.length}}}
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         })
@@ -58,7 +58,7 @@ module Gdocs
       def newline
         update_body({
           requests: [
-            {insertText: {text: "\n", location: {index: @end + 1}}},
+            {insertText: {text: "\n", location: {index: @end}}},
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         })
@@ -69,7 +69,7 @@ module Gdocs
       def table_to_body(rows, columns)
         update_body({
           requests: [
-            {insertTable: {rows: rows, columns: columns, location: {index: @end + 1}}}
+            {insertTable: {rows: rows, columns: columns, location: {index: @end}}}
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         })
