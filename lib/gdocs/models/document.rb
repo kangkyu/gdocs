@@ -2,6 +2,7 @@ require 'net/http'
 require 'json'
 
 require 'gdocs/concerns/attributes'
+require 'gdocs/concerns/requests'
 
 module Gdocs
   module Models
@@ -12,6 +13,7 @@ module Gdocs
       document_attributes :title, :document_id, :revision_id
 
       GOOGLE_DOCS = 'https://docs.googleapis.com/v1/documents'
+      include Concerns::Requests
 
       def initialize(token)
         if token.to_s.empty?
@@ -97,16 +99,7 @@ module Gdocs
       def document_post_request(url_path, body: {})
         uri = URI(GOOGLE_DOCS + url_path)
 
-        req = Net::HTTP::Post.new(uri.to_s)
-        req.initialize_http_header 'Content-Type' => 'application/json'
-        req['Authorization'] = "Bearer #{@token}"
-
-        req.body = body.to_json
-
-        res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
-          http.request(req)
-        end
-
+        res = post_request(uri, auth_token: @token, body: body.to_json)
         response_body = JSON(res.body)
 
         if response_body["error"]
@@ -118,12 +111,7 @@ module Gdocs
       def document_get_request(url_path)
         uri = URI(GOOGLE_DOCS + url_path)
 
-        req = Net::HTTP::Get.new(uri.to_s)
-        req['Authorization'] = "Bearer #{@token}"
-
-        res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
-          http.request(req)
-        end
+        res = get_request(uri, auth_token: @token)
         JSON(res.body)
       end
     end
