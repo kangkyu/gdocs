@@ -38,6 +38,7 @@ module Gdocs
 
         response_body = document_post_request("", body: request_body)
         @data.merge! response_body
+        @end = @data["body"]["content"][-1]["endIndex"]
         self
       end
 
@@ -47,11 +48,11 @@ module Gdocs
           requests: [
             {insertText: {text: text, location: {index: @end + 1}}},
             {updateTextStyle: {textStyle: {weightedFontFamily: {fontFamily: font, weight: 500}},
-              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length + 1}}},
+              fields: "*", range: {startIndex: @end + 1, endIndex: @end + text.length + 1}}}
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         })
-        @end = @data["body"]["content"][-1]["endIndex"]
+        @end += text.length
       end
 
       def newline
@@ -61,7 +62,7 @@ module Gdocs
           ],
           writeControl: {requiredRevisionId: @last_revision_id}
         })
-        @end = @data["body"]["content"][-1]["endIndex"]
+        @end += 1
       end
 
       # https://developers.google.com/docs/api/reference/rest/v1/documents/request#InsertTableRequest
