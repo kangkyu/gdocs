@@ -5,8 +5,9 @@ require 'gdocs/concerns/requests'
 
 module Gdocs
   module Models
+    GOOGLE_SHEETS = "https://sheets.googleapis.com/v4/spreadsheets"
+
     class Spreadsheet
-      GOOGLE_SHEETS = "https://sheets.googleapis.com/v4/spreadsheets"
       include Concerns::Requests
 
       def initialize(token)

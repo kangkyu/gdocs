@@ -6,13 +6,14 @@ require 'gdocs/concerns/requests'
 
 module Gdocs
   module Models
+    GOOGLE_DOCS = 'https://docs.googleapis.com/v1/documents'
+
     class Document
       attr_writer :data # for testing only
 
       include Concerns::Attributes
       document_attributes :title, :document_id, :revision_id
 
-      GOOGLE_DOCS = 'https://docs.googleapis.com/v1/documents'
       include Concerns::Requests
 
       def initialize(token)
